@@ -269,6 +269,7 @@ body {
   .cafe-item-label {
     display: flex;
     justify-content: center;
+    height: 32px;
   }
   .nombre-jugador {
     font-weight: 500;
