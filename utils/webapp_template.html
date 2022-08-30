@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="MobileOptimized" content="176">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      function setThemeClass() {
+        document.documentElement.className = Telegram.WebApp.colorScheme;
+      }
+      Telegram.WebApp.onEvent('themeChanged', setThemeClass);
+      setThemeClass();
+    </script>
+    <link href="assets/css/cafe.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="jornada round-page">
+      {% for partido, dp in round_data.items() %}
+      <div id="{{ partido }}" class="encuentro {% if not loop.first %}deactivated{% endif %}">
+        <section class="pronostico pronostico-items">
+          <div class="resultado-equipos">
+            <div class="escudo-item-photo">
+              <img id="escudo-local-{{ partido }}" src="{{ dp.local.escudo }}">
+            </div>
+              <div id="marcador-local-{{ partido }}" class="marcador">1</div>
+              <div id="marcador-visitante-{{ partido }}" class="marcador">3</div>
+            <div class="escudo-item-photo">
+              <img id="escudo-visitante-{{ partido }}" src="{{ dp.visitante.escudo }}">
+            </div>
+          </div>
+          <div class="pie-pronostico">
+            <div class="nombre-equipo nombre-equipo-local">{{ dp.local.nombre }}</div>
+            <div class="resultado-1x2">
+              <span class="uno">1</span>
+              <span class="equis selected-1x2">X</span>
+              <span class="dos">2</span>
+            </div>
+            <div class="nombre-equipo nombre-equipo-visitante">{{ dp.visitante.nombre }}</div>
+          </div>
+        </section>
+        <section class="jugadores">
+          <div class="local local-items">
+            {% for jugador in dp.local.jugadores %}
+            <div class="cafe-item js-item" data-item-id="{{jugador.id}}" data-item-price="1490">
+              <div class="cafe-item-counter js-item-counter">1</div>
+              <div class="cafe-item-photo">
+                <picture class="cafe-item-lottie js-item-lottie">
+                  <img loading="lazy" src="{{ jugador.foto }}">
+                  <div class="position-label-wrapper">
+                     {% if jugador.posicion=="POR" %}
+                     <div class="position-label position-goalkeeper">{{ jugador.posicion }}</div>
+                     {% elif jugador.posicion=="DEF"%}
+                     <div class="position-label position-defender">{{ jugador.posicion }}</div>
+                     {% elif jugador.posicion=="MED"%}
+                     <div class="position-label position-midfielder">{{ jugador.posicion }}</div>
+                     {% elif jugador.posicion=="DEL"%}
+                     <div class="position-label position-attacker">{{ jugador.posicion }}</div>
+                     {% else %}
+                     <div class="position-label position-unknown">{{ jugador.posicion }}</div>
+                     {% endif %}
+                  </div>
+                </picture>
+              </div>
+              <div class="cafe-item-label">
+                <span class="nombre-jugador">{{ jugador.nombre }}</span>
+              </div>
+              <div class="cafe-item-buttons">
+                <button class="cafe-item-decr-button js-item-decr-btn button-item ripple-handler">
+                  <span class="ripple-mask"><span class="ripple"></span></span>
+                </button>
+                <button class="cafe-item-incr-button js-item-incr-btn button-item ripple-handler">
+                  <span class="button-item-label">Gol!</span>
+                  <span class="ripple-mask"><span class="ripple"></span></span>
+                </button>
+              </div>
+            </div> 
+            {% endfor %}
+          </div>
+          <div class="visitante visitante-items deactivated">
+            {% for jugador in dp.visitante.jugadores %}
+            <div class="cafe-item js-item" data-item-id="{{ jugador.id }}" data-item-price="1490">
+              <div class="cafe-item-counter js-item-counter">1</div>
+              <div class="cafe-item-photo">
+                <picture class="cafe-item-lottie js-item-lottie">
+                  <img loading="lazy" src="{{ jugador.foto }}">
+                  <div class="position-label-wrapper">
+                     {% if jugador.posicion=="POR" %}
+                     <div class="position-label position-goalkeeper">{{ jugador.posicion }}</div>
+                     {% elif jugador.posicion=="DEF"%}
+                     <div class="position-label position-defender">{{ jugador.posicion }}</div>
+                     {% elif jugador.posicion=="MED"%}
+                     <div class="position-label position-midfielder">{{ jugador.posicion }}</div>
+                     {% elif jugador.posicion=="DEL"%}
+                     <div class="position-label position-attacker">{{ jugador.posicion }}</div>
+                     {% else %}
+                     <div class="position-label position-unknown">{{ jugador.posicion }}</div>
+                     {% endif %}
+                  </div>
+                </picture>
+              </div>
+              <div class="cafe-item-label">
+                <span class="nombre-jugador">{{ jugador.nombre }}</span>
+              </div>
+              <div class="cafe-item-buttons">
+                <button class="cafe-item-decr-button js-item-decr-btn button-item ripple-handler">
+                  <span class="ripple-mask"><span class="ripple"></span></span>
+                </button>
+                <button class="cafe-item-incr-button js-item-incr-btn button-item ripple-handler">
+                  <span class="button-item-label">Gol!</span>
+                  <span class="ripple-mask"><span class="ripple"></span></span>
+                </button>
+              </div>
+            </div> 
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+      {% endfor %}
+    </div>
+    <script src="https://tg.dev/js/jquery.min.js"></script>
+    <script src="https://tg.dev/js/tgsticker.js?27"></script>
+    <script src="assets/js/cafe.js"></script>
+    <script>Cafe.init({"apiUrl":"\/cafe\/api","userId":0,"userHash":null});</script>
+  </body>
+</html>
