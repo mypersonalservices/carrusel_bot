@@ -3,7 +3,7 @@ import json
 import logging
 import time
 import re
-from database import get_or_create_user, User, Round, Bid
+from database import get_or_create_user, User, BettingRound, Bet
 from tenacity import retry
 from telebot import types as bot_types, TeleBot
 from telebot.apihelper import ApiException
@@ -103,7 +103,7 @@ def register_bot_actions(bot):
         bot.send_message(chat_id, f"Te doy la bienvenida {user.name}" + _e("Ya tienes disponible el botón 'Mi apuesta Carrusel'"), reply_markup=keyboard_markup)
 
     @bot.message_handler(content_types=['web_app_data'])  # No content types necessary because this webapp sends service message
-    def store_bid(message):
+    def store_bet(message):
         chat_id = message.chat.id
         user_id = message.from_user.id
 
@@ -111,31 +111,31 @@ def register_bot_actions(bot):
         if not user:
             return
 
-        bid_data = message.web_app_data.data
+        bet_data = message.web_app_data.data
         try:
-            # Get season id and round
-            temp_bid_data = json.loads(bid_data)
-            season_id = temp_bid_data["il"]   # id_liga
-            round_number = temp_bid_data["j"] # jornada
+            # Get season id and betting round number
+            temp_bet_data = json.loads(bet_data)
+            season_id = temp_bet_data["il"]   # id_liga
+            betting_round_number = temp_bet_data["j"] # jornada
 
-            # Ensure the given round is not closed already
-            current_round = Round.get_or_none(season_id=season_id, round_number=round_number)
-            if not current_round or not current_round.is_open:
-                bot.send_message(chat_id, _e(f"ERROR: La jornada {round_number} está cerrada y no se pueden enviar apuestas."))
+            # Ensure the given betting round is not closed already
+            current_betting_round = BettingRound.get_or_none(season_id=season_id, betting_round_number=betting_round_number)
+            if not current_betting_round or not current_betting_round.is_open:
+                bot.send_message(chat_id, _e(f"ERROR: La jornada {betting_round_number} está cerrada y no se pueden enviar apuestas."))
                 return
 
-            # Store bid (new or update)
-            (Bid.insert(season_round=current_round, owner=user, data=bid_data)
+            # Store bet (new or update)
+            (Bet.insert(betting_round=current_betting_round, owner=user, data=bet_data)
             .on_conflict(
-                conflict_target=[Bid.season_round_id, Bid.owner_id],
-                preserve=[Bid.data]
+                conflict_target=[Bet.betting_round_id, Bet.owner_id],
+                preserve=[Bet.data]
             )
             .execute())
 
             # Let user know everything went well
-            bot.send_message(chat_id, _e(f"Tu apuesta para la jornada {round_number} ha sido almacenada correctamente!"))
+            bot.send_message(chat_id, _e(f"Tu apuesta para la jornada {betting_round_number} ha sido almacenada correctamente!"))
         except:
-            logging.exception('Got exception in store_bid handler')
+            logging.exception('Got exception in store_bet handler')
             raise
 
 

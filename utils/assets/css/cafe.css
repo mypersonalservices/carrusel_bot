@@ -52,12 +52,12 @@ body {
     -webkit-tap-highlight-color: transparent;
   }
   
-  .round-page {
+  .betting-round-page {
     transition: filter var(--animation);
     margin: 0 auto;
     max-width: 480px;
   }
-  body.closed .round-page {
+  body.closed .betting-round-page {
     filter: grayscale(1) opacity(0.7);
   }
   

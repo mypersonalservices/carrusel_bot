@@ -12,7 +12,7 @@ var Cafe = {
   active_match_index: 1,
   active_match: "partido1",
   active_team: "local",
-  roundMetadata: {},
+  bettingRoundMetadata: {},
   
 
   init: function (options) {
@@ -160,10 +160,10 @@ var Cafe = {
       Cafe.updateMainButton();
     }
   },
-  compileBidData: function() {
-    Cafe.roundMetadata.il = $("#game_metadata").data("idliga");
-    Cafe.roundMetadata.j = $("#game_metadata").data("jornada");
-    Cafe.roundMetadata.p = [];
+  compileBetData: function() {
+    Cafe.bettingRoundMetadata.il = $("#game_metadata").data("idliga");
+    Cafe.bettingRoundMetadata.j = $("#game_metadata").data("jornada");
+    Cafe.bettingRoundMetadata.p = [];
     $(".encuentro").each(function(i, encuentro) {
       var matchId = $(encuentro).data("id-encuentro");
       var result1x2 = $(encuentro).find(".selected-1x2").data("value");
@@ -185,9 +185,9 @@ var Cafe = {
         awayPlayersData.push(playerDataString);
       });
 
-      // Compile all the data for the bid
+      // Compile all the data for the bet
       var matchTagName = "p"+matchId;
-      Cafe.roundMetadata.p[i] = { 
+      Cafe.bettingRoundMetadata.p[i] = { 
         [matchTagName]: {
           "q": result1x2,
           "l": homePlayersData,
@@ -196,7 +196,7 @@ var Cafe = {
       };
 
 /*    for (i=1; i<=Cafe.number_of_matches; i++) {
-      Cafe.roundMetadata.p["p"+i] = {"q":"x", "l":[], "v":[]};
+      Cafe.bettingRoundMetadata.p["p"+i] = {"q":"x", "l":[], "v":[]};
     }
 */
     });
@@ -303,20 +303,20 @@ var Cafe = {
       mainButton.hide();
     }
   },
-  sendBidData: function() {
-    Cafe.compileBidData();
+  sendBetData: function() {
+    Cafe.compileBetData();
     Telegram.WebApp.sendData(
-      JSON.stringify(Cafe.roundMetadata)
+      JSON.stringify(Cafe.bettingRoundMetadata)
     );
   },
   mainBtnClicked: function () {
     if (Cafe.isLoading || Cafe.isClosed) {
       return false;
     }
-    Cafe.sendBidData();
+    Cafe.sendBetData();
   },
   backBtnClicked: function() {
-    // Warn user that leaving the webapp implies not saving the bid
+    // Warn user that leaving the webapp implies not saving the bet
     $("#avisos").removeClass("aviso-off");
   },
   leaveApp: function() {

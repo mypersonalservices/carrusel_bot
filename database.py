@@ -24,10 +24,10 @@ class JSONField(CharField):
         # The resulting store will be loaded to Python native type
         return json.loads(value)
 
-class BidField(CharField):
+class BetField(CharField):
     equivalences_table = {
         'il': 'id_liga',   # id season 
-        'j': 'jornada',    # season round
+        'j': 'jornada',    # betting round
         'p': 'partidos',   # matches 
         'q': 'quiniela',   # result 1x2
         'l': 'local',      # home team 
@@ -48,7 +48,7 @@ class BidField(CharField):
                 value_str = value_str.replace(from_this, to_this)
             return value_str
         else:
-            raise Exception("BidField only accepts string or dict")
+            raise Exception("BetField only accepts string or dict")
 
     def python_value(self, value):
         # Make sure to retrieve the expanded version as a dict
@@ -83,29 +83,41 @@ class User(Model):
         return user.uid == 1 or user.uid == 2
 
 
-class Round(Model):
+# class Match(Model):
+#     match_id # This is the fixture_id from API Soccer
+#     home
+#     away
+# 
+# 
+# 
+# class MatchBettingRound(Model):
+#     rondadasds = ForeignKeyField(BettingRound)
+#     matchasdf = ForeignKeyField(Match)
+
+
+class BettingRound(Model):
     season_id = IntegerField()
-    round_number = IntegerField()
+    betting_round_number = IntegerField()
     matches = JSONField()
     is_open = BooleanField(default=False)
 
     class Meta:
         database = main_db
         indexes = (
-            (('season_id', 'round_number'), True),
+            (('season_id', 'betting_round_number'), True),
         )
 
 
-class Bid(Model):
-    season_round = ForeignKeyField(Round, backref='bids')
-    owner = ForeignKeyField(User, backref='bids')
-    data = BidField()    
+class Bet(Model):
+    betting_round = ForeignKeyField(BettingRound, backref='bets')
+    owner = ForeignKeyField(User, backref='bets')
+    data = BetField()    
     total_points = IntegerField(default=0)
 
     class Meta:
         database = main_db
         indexes = (
-            (('season_round', 'owner'), True),
+            (('betting_round', 'owner'), True),
         )
 # ##### END OF MODELS ##### #
 
@@ -119,7 +131,7 @@ def create_or_update_tables():
     # Check if db already exist, and if it's the case make backup before continue
     backup_db()
 
-    DB_TABLES = [Migrations, User, Round, Bid]
+    DB_TABLES = [Migrations, User, BettingRound, Bet]
     # Create base tables
     with main_db:
         main_db.create_tables(DB_TABLES)

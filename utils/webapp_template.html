@@ -28,7 +28,7 @@
     </div>
 </div>
 <div id="cortina"></div>
-<div class="jornada round-page">
+<div class="jornada betting-round-page">
     <div id="partidos">
         {% for partido, dp in game_data.matches.items() %}
         <div id="{{ partido }}" class="encuentro {% if loop.first %}active{% else %}deactivated{% endif %}"

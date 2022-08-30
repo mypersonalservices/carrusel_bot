@@ -2,7 +2,7 @@
 # exit when any command fails
 set -e
 
-./utils/render_round.py
+./utils/render_betting_round.py
 touch TRASH_FILE_TO_FORCE_STASH
 git stash -u
 git checkout gh-pages
