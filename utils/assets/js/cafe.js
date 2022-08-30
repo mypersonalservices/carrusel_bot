@@ -8,7 +8,6 @@
 })(jQuery);
 
 var Cafe = {
-  canPay: false,
   modeOrder: false,
   totalPrice: 0,
   active_match_index: 1,
@@ -47,6 +46,8 @@ var Cafe = {
       text_color: "#fff",
       is_visible: true,
     }).onClick(Cafe.mainBtnClicked);
+    Telegram.WebApp.BackButton.show();
+    Telegram.WebApp.BackButton.onClick(Cafe.backBtnClicked);
     initRipple();
   },
   showTeamPlayers: function() {
@@ -250,6 +251,9 @@ var Cafe = {
     }
     return s.join(dec);
   },
+  inFirstMatch: function() {
+    return Cafe.current_match_index == 1;
+  },
   inLastMatch: function() {
     return Cafe.current_match_index == Cafe.number_of_matches;
   },
@@ -266,7 +270,7 @@ var Cafe = {
       } else {
         mainButton
           .setParams({
-            is_visible: !!Cafe.canPay,
+            is_visible: true,
             text: "HACER APUESTA!",
             color: "#50AA50",
           })
@@ -275,7 +279,7 @@ var Cafe = {
     } else {
       mainButton
         .setParams({
-          is_visible: !!Cafe.canPay,
+          is_visible: true,
           text: "SIGUIENTE PARTIDO",
           color: "#50AA50",
         })
@@ -290,7 +294,6 @@ var Cafe = {
       var count = +itemEl.data("item-count") || 0;
       total_price += price * count;
     });
-    Cafe.canPay = total_price > 0;
     Cafe.totalPrice = total_price;
     Cafe.updateMainButton();
   },
@@ -350,7 +353,7 @@ var Cafe = {
   },
 */
   mainBtnClicked: function () {
-    if (!Cafe.canPay || Cafe.isLoading || Cafe.isClosed) {
+    if (Cafe.isLoading || Cafe.isClosed) {
       return false;
     }
     if (Cafe.modeOrder) {
@@ -379,8 +382,16 @@ var Cafe = {
         // For now, we don't use "summary" modes as the Cafe example so
         // here we change the main button behaviour to fit our needs
         if (Cafe.inLastMatch()) {
+            // Send bid data to the bot and close
+        } else {
+            Cafe.nextMatch();
         }
     }
+  },
+  backBtnClicked: function() {
+      if (!Cafe.inFirstMatch()) {
+        Cafe.previousMatch();
+      }
   },
   eStatusClicked: function () {
     Cafe.hideStatus();
