@@ -133,23 +133,9 @@
       <div id="jornada" data-item-jornada="12"></div>
     </div>
     <script src="https://tg.dev/js/jquery.min.js"></script>
-    <script src="assets/js/cafe.js"></script>
     <script src="assets/js/jquery.mobile.custom.min.js"></script>
+    <script src="assets/js/cafe.js"></script>
     <script>Cafe.init({"apiUrl":"\/cafe\/api","userId":0,"userHash":null});
-    </script>
-    <script>
-        $(function (){
-            $("body").on("swipeleft", swipeleftHandler);
-            function swipeleftHandler(event) {
-                Cafe.nextMatch();
-            }
-        });
-        $(function (){
-            $("body").on("swiperight", swiperightHandler);
-            function swiperightHandler(event) {
-                Cafe.previousMatch();
-            }
-        });
     </script>
   </body>
 </html>

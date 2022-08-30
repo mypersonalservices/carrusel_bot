@@ -33,6 +33,8 @@ var Cafe = {
       return;
     }
 */
+    $("body").on("swipeleft", Cafe.swipeleftHandler);
+    $("body").on("swiperight", Cafe.swiperightHandler);
     $(".marcador").on("click", Cafe.showTeamPlayers);
     $("#mensaje-ok").on("click", Cafe.leaveApp);
     $("#mensaje-cancelar").on("click", Cafe.dismissWarning);
@@ -50,8 +52,15 @@ var Cafe = {
       color: "#50AA50",
       is_visible: false,
     }).onClick(Cafe.mainBtnClicked);
+    Telegram.WebApp.BackButton.show();
     Telegram.WebApp.BackButton.onClick(Cafe.backBtnClicked);
     initRipple();
+  },
+  swipeleftHandler: function(event) {
+    Cafe.nextMatch();
+  },
+  swiperightHandler: function(event) {
+    Cafe.previousMatch();
   },
   showTeamPlayers: function() {
     scoreboard_id = $(this)[0].id;
@@ -285,7 +294,7 @@ var Cafe = {
   },
   updateMainButton: function () {
     var mainButton = Telegram.WebApp.MainButton;
-    if (Cafe.inLastMatch) {
+    if (Cafe.inLastMatch()) {
 /*      if (Cafe.isLoading) {
         mainButton
           .setParams({
@@ -374,12 +383,16 @@ var Cafe = {
     Cafe.updateTotalPrice();
   },
 */
+  sendBidData: function() {
+    $("body").css({"color": "red"});
+  },
   mainBtnClicked: function () {
     if (Cafe.isLoading || Cafe.isClosed) {
       return false;
     }
-    if (Cafe.modeOrder) {
-/*      var comment = $(".js-order-comment-field").val();
+    Cafe.sendBidData();
+/*    if (Cafe.modeOrder) {
+      var comment = $(".js-order-comment-field").val();
       var params = {
         order_data: Cafe.getOrderData(),
         comment: comment,
@@ -398,7 +411,7 @@ var Cafe = {
           Cafe.showStatus(result.error);
         }
       });
-*/
+
     } else {
 //      Cafe.toggleMode(true);
         // For now, we don't use "summary" modes as the Cafe example so
@@ -409,6 +422,7 @@ var Cafe = {
             Cafe.nextMatch();
         }
     }
+*/
   },
   backBtnClicked: function() {
     // Warn user that leaving the webapp implies not saving the bid
