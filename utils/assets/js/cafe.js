@@ -11,14 +11,17 @@ var Cafe = {
   canPay: false,
   modeOrder: false,
   totalPrice: 0,
+  active_match_index: 1,
   active_match: "partido1",
   active_team: "local",
+  
 
   init: function (options) {
     Telegram.WebApp.ready();
     Cafe.apiUrl = options.apiUrl;
     Cafe.userId = options.userId;
     Cafe.userHash = options.userHash;
+    Cafe.number_of_matches = $(".encuentro").length;
     $("body").show();
 /*  PEI REMOVED
     if (
@@ -35,13 +38,14 @@ var Cafe = {
     $(".escudo-item-photo").on("click", Cafe.toggleWinner);
     $(".js-item-incr-btn").on("click", Cafe.eIncrClicked);
     $(".js-item-decr-btn").on("click", Cafe.eDecrClicked);
-    $(".js-order-edit").on("click", Cafe.eEditClicked);
+//    $(".js-order-edit").on("click", Cafe.eEditClicked);
     $(".js-status").on("click", Cafe.eStatusClicked);
     $(".js-order-comment-field").each(function () {
       autosize(this);
     });
     Telegram.WebApp.MainButton.setParams({
       text_color: "#fff",
+      is_visible: true,
     }).onClick(Cafe.mainBtnClicked);
     initRipple();
   },
@@ -96,6 +100,44 @@ var Cafe = {
   clean1x2: function (match_id) {
     $("#" + match_id + " .resultado-1x2").find("span").removeClass("selected-1x2");
   },
+  activateMatch(match_index) {
+    Cafe.active_match = "partido" + match_index;
+
+    // Reset active team class to local
+    Cafe.active_team = "local";
+
+    // Disabling all of the matches
+    $(".encuentro").addClass("deactivated");
+
+    // Make new current match visible
+    $("#" + Cafe.active_match).removeClass("deactivated");
+  },
+  nextMatch: function() {
+    if (Cafe.active_match_index < Cafe.number_of_matches) {
+      // Increment match index and update current match
+      Cafe.active_match_index += 1;
+
+      // Show new current match
+      Cafe.activateMatch(Cafe.active_match_index);
+
+      // Update telegram main button (if last match, action should be 
+      // Make bet! or similar)
+      Cafe.updateMainButton();
+    }
+  },
+  previousMatch: function() {
+    if (Cafe.active_match_index > 1) {
+      // Decrement match index and update current match
+      Cafe.active_match_index -= 1;
+      
+      // Show new current match
+      Cafe.activateMatch(Cafe.active_match_index);
+
+      // Update telegram main button (if last match, action should be 
+      // Make bet! or similar)
+      Cafe.updateMainButton();
+    }
+  },
   eIncrClicked: function (e) {
     e.preventDefault();
     var itemEl = $(this).parents(".js-item");
@@ -106,10 +148,12 @@ var Cafe = {
     var itemEl = $(this).parents(".js-item");
     Cafe.incrClicked(itemEl, -1);
   },
+/*
   eEditClicked: function (e) {
     e.preventDefault();
     Cafe.toggleMode(false);
   },
+*/
   getOrderItem: function (itemEl) {
     var id = itemEl.data("item-id");
     return $(".js-order-item").filter(function () {
@@ -138,7 +182,7 @@ var Cafe = {
     }
     counterEl.css("animation-name", anim_name);
     itemEl.toggleClass("selected", count > 0);
-
+/*
     var orderItemEl = Cafe.getOrderItem(itemEl);
     var orderCounterEl = $(".js-order-item-counter", orderItemEl);
     orderCounterEl.text(count ? count : 1);
@@ -148,6 +192,7 @@ var Cafe = {
     orderPriceEl.text(Cafe.formatPrice(item_price));
 
     Cafe.updateTotalPrice();
+*/
   },
   incrClicked: function (itemEl, delta) {
     if (Cafe.isLoading || Cafe.isClosed) {
@@ -205,9 +250,12 @@ var Cafe = {
     }
     return s.join(dec);
   },
+  inLastMatch: function() {
+    return Cafe.current_match_index == Cafe.number_of_matches;
+  },
   updateMainButton: function () {
     var mainButton = Telegram.WebApp.MainButton;
-    if (Cafe.modeOrder) {
+    if (Cafe.inLastMatch) {
       if (Cafe.isLoading) {
         mainButton
           .setParams({
@@ -219,8 +267,8 @@ var Cafe = {
         mainButton
           .setParams({
             is_visible: !!Cafe.canPay,
-            text: "PAY " + Cafe.formatPrice(Cafe.totalPrice),
-            color: "#31b545",
+            text: "HACER APUESTA!",
+            color: "#50AA50",
           })
           .hideProgress();
       }
@@ -228,13 +276,13 @@ var Cafe = {
       mainButton
         .setParams({
           is_visible: !!Cafe.canPay,
-          text: "VIEW ORDER",
-          color: "#31b545",
+          text: "SIGUIENTE PARTIDO",
+          color: "#50AA50",
         })
         .hideProgress();
     }
   },
-  updateTotalPrice: function () {
+/*  updateTotalPrice: function () {
     var total_price = 0;
     $(".js-item").each(function () {
       var itemEl = $(this);
@@ -300,12 +348,13 @@ var Cafe = {
     $("body").toggleClass("loading", !!Cafe.isLoading);
     Cafe.updateTotalPrice();
   },
+*/
   mainBtnClicked: function () {
     if (!Cafe.canPay || Cafe.isLoading || Cafe.isClosed) {
       return false;
     }
     if (Cafe.modeOrder) {
-      var comment = $(".js-order-comment-field").val();
+/*      var comment = $(".js-order-comment-field").val();
       var params = {
         order_data: Cafe.getOrderData(),
         comment: comment,
@@ -324,8 +373,13 @@ var Cafe = {
           Cafe.showStatus(result.error);
         }
       });
+*/
     } else {
-      Cafe.toggleMode(true);
+//      Cafe.toggleMode(true);
+        // For now, we don't use "summary" modes as the Cafe example so
+        // here we change the main button behaviour to fit our needs
+        if (Cafe.inLastMatch()) {
+        }
     }
   },
   eStatusClicked: function () {
