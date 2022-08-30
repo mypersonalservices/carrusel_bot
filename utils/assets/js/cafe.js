@@ -11,13 +11,14 @@ var Cafe = {
   canPay: false,
   modeOrder: false,
   totalPrice: 0,
+  active_match: "partido1",
+  active_team: "local",
 
   init: function (options) {
     Telegram.WebApp.ready();
     Cafe.apiUrl = options.apiUrl;
     Cafe.userId = options.userId;
     Cafe.userHash = options.userHash;
-    Cafe.initLotties();
     $("body").show();
 /*  PEI REMOVED
     if (
@@ -32,7 +33,6 @@ var Cafe = {
 */
     $(".marcador").on("click", Cafe.showTeamPlayers);
     $(".escudo-item-photo").on("click", Cafe.toggleWinner);
-    $(".js-item-lottie").on("click", Cafe.eLottieClicked);
     $(".js-item-incr-btn").on("click", Cafe.eIncrClicked);
     $(".js-item-decr-btn").on("click", Cafe.eDecrClicked);
     $(".js-order-edit").on("click", Cafe.eEditClicked);
@@ -48,14 +48,14 @@ var Cafe = {
   showTeamPlayers: function() {
     scoreboard_id = $(this)[0].id;
     scoreboard_id_array = scoreboard_id.split("-");
-    team_class = scoreboard_id_array[1];
-    match_id = scoreboard_id_array[2];
-    clicked_team = $("#" + match_id + " .jugadores ." + team_class);
-    if (team_class == "local") {
-      non_clicked_team = $("#" + match_id + " .jugadores .visitante");
+    Cafe.active_team = scoreboard_id_array[1];
+    Cafe.active_match = scoreboard_id_array[2];
+    clicked_team = $("#" + Cafe.active_match + " .jugadores ." + Cafe.active_team);
+    if (Cafe.active_team == "local") {
+      non_clicked_team = $("#" + Cafe.active_match + " .jugadores .visitante");
       opposite_team_class = "visitante"
     } else {
-      non_clicked_team = $("#" + match_id + " .jugadores .local");
+      non_clicked_team = $("#" + Cafe.active_match + " .jugadores .local");
       opposite_team_class = "local"
     }
     // Activate clicked team players and deactivate
@@ -63,8 +63,8 @@ var Cafe = {
     clicked_team.removeClass("deactivated");
     non_clicked_team.addClass("deactivated");
     // Add shadow to scoreboard box of the clicked team to differentiate
-    scoreboard_to_select = $("#marcador-" + team_class + "-" + match_id);
-    scoreboard_to_unselect = $("#marcador-" + opposite_team_class + "-" + match_id);
+    scoreboard_to_select = $("#marcador-" + Cafe.active_team + "-" + Cafe.active_match);
+    scoreboard_to_unselect = $("#marcador-" + opposite_team_class + "-" + Cafe.active_match);
     scoreboard_to_select.addClass("selected-scoreboard-side");
     scoreboard_to_unselect.removeClass("selected-scoreboard-side");
   },
@@ -73,44 +73,28 @@ var Cafe = {
     clicked_team_element = clicked_team[0];
     clicked_team_id_array = clicked_team_element.id.split("-");
     team_class = clicked_team_id_array[1];
-    match_id = clicked_team_id_array[2];
     if (team_class == "local") {
-      non_clicked_team = $("#escudo-visitante-" + match_id);
-      score_1x2 = $("#" + match_id + " .resultado-1x2 .uno");
+      non_clicked_team = $("#escudo-visitante-" + Cafe.active_match);
+      score_1x2 = $("#" + Cafe.active_match + " .resultado-1x2 .uno");
     } else {
-      non_clicked_team = $("#escudo-local-" + match_id);
-      score_1x2 = $("#" + match_id + " .resultado-1x2 .dos");
+      non_clicked_team = $("#escudo-local-" + Cafe.active_match);
+      score_1x2 = $("#" + Cafe.active_match + " .resultado-1x2 .dos");
     }
     // Check if clicked team is marked as winner already,
     // and if it is, unmark both.
     if (clicked_team.hasClass("winner")) {
       clicked_team.removeClass("winner");
-      score_1x2 = $("#" + match_id + " .resultado-1x2 .equis");
+      score_1x2 = $("#" + Cafe.active_match + " .resultado-1x2 .equis");
     } else {
       clicked_team.addClass("winner");
     }
     non_clicked_team.removeClass("winner");
     // Clean 1X2 scoreboard before assignin new result
-    Cafe.clean1x2(match_id);
+    Cafe.clean1x2(Cafe.active_match);
     score_1x2.addClass("selected-1x2");
   },
   clean1x2: function (match_id) {
     $("#" + match_id + " .resultado-1x2").find("span").removeClass("selected-1x2");
-  },
-  initLotties: function () {
-    $(".js-item-lottie").each(function () {
-      RLottie.init(this, {
-        maxDeviceRatio: 2,
-        cachingModulo: 3,
-        noAutoPlay: true,
-      });
-    });
-  },
-  eLottieClicked: function (e) {
-    if (Cafe.isClosed) {
-      return false;
-    }
-    RLottie.playOnce(this);
   },
   eIncrClicked: function (e) {
     e.preventDefault();
@@ -138,11 +122,6 @@ var Cafe = {
     var counterEl = $(".js-item-counter", itemEl);
     counterEl.text(count ? count : 1);
     var isSelected = itemEl.hasClass("selected");
-    if (!isSelected && count > 0) {
-      $(".js-item-lottie", itemEl).each(function () {
-        RLottie.playOnce(this);
-      });
-    }
     var anim_name = isSelected
       ? delta > 0
         ? "badge-incr"
@@ -181,6 +160,14 @@ var Cafe = {
     }
     itemEl.data("item-count", count);
     Cafe.updateItem(itemEl, delta);
+    // Update scoreboard
+    scoreboard_to_change = $("#marcador-" + Cafe.active_team + "-" + Cafe.active_match);
+    current_score = +scoreboard_to_change.text();
+    current_score += delta;
+    if (current_score < 0) {
+      current_score = 0;
+    }
+    scoreboard_to_change.text(current_score)
   },
   formatPrice: function (price) {
     return "$" + Cafe.formatNumber(price / 1000, 2, ".", ",");
@@ -291,9 +278,6 @@ var Cafe = {
     }
     if (mode_order) {
       var height = $(".cafe-items").height();
-      $(".js-item-lottie").each(function () {
-        RLottie.setVisible(this, false);
-      });
       $(".cafe-order-overview").show();
       $(".cafe-items").css("maxHeight", height).redraw();
       $("body").addClass("order-mode");
@@ -301,22 +285,11 @@ var Cafe = {
         autosize.update(this);
       });
       Telegram.WebApp.expand();
-      setTimeout(function () {
-        $(".js-item-lottie").each(function () {
-          RLottie.setVisible(this, true);
-        });
-      }, anim_duration);
     } else {
-      $(".js-item-lottie").each(function () {
-        RLottie.setVisible(this, false);
-      });
       $("body").removeClass("order-mode");
       setTimeout(function () {
         $(".cafe-items").css("maxHeight", "");
         $(".cafe-order-overview").hide();
-        $(".js-item-lottie").each(function () {
-          RLottie.setVisible(this, true);
-        });
       }, anim_duration);
     }
     Cafe.updateMainButton();
