@@ -1,0 +1,7 @@
+__pycache__                                                                                                                                                   
+*.swp                                                                                                                                                         
+*.pyc                                                                                                                                                         
+.idea                                                                                                                                                         
+stuff_not_to_commit                                                                                                                                           
+BOT_TOKEN                                                                                                                                                     
+rqworker.log
