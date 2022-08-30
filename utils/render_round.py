@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from pathlib import Path
+from random import randint
 import shutil
 
 from jinja2 import Template
@@ -16,7 +17,7 @@ def get_mock_round_data(matches=5):
     matches_data = {}
     for round_match in range(matches):
         round_match_id = round_match + 1
-        current_match = "partido" + str(round_match)
+        current_match_id = randint(100000, 500000)
         home_team_id = current_team_id
         home_team_name = fake.team_name()
         current_team_id +=1
@@ -49,6 +50,7 @@ def get_mock_round_data(matches=5):
             current_player_id += 1
 
         current_match_data = {
+            'id_encuentro': current_match_id,
             'local': {
                 'id': home_team_id,
                 'nombre': home_team_name,
@@ -64,7 +66,14 @@ def get_mock_round_data(matches=5):
         }
 
         matches_data.update({'partido'+str(round_match_id): current_match_data})
-    return matches_data
+    game_data = {}
+    game_data['id_liga'] = 123123123
+    game_data['jornada'] = 12
+    game_data['matches'] = matches_data
+    with open("/tmp/estructura_datos_carruselbot.txt", "w+") as f:
+       import json
+       f.write(json.dumps(game_data, indent=2))
+    return game_data
 
 
 def render_webapp_round():
@@ -74,7 +83,7 @@ def render_webapp_round():
     
     # Render template with given data
     data_to_render = get_mock_round_data()
-    rendered_template = webapp_template.render(round_data=data_to_render)
+    rendered_template = webapp_template.render(game_data=data_to_render)
     
     # Build rendered webapp
     output_dir = current_path / "build"

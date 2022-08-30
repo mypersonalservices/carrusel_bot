@@ -13,6 +13,7 @@ var Cafe = {
   active_match_index: 1,
   active_match: "partido1",
   active_team: "local",
+  roundMetadata: {},
   
 
   init: function (options) {
@@ -123,9 +124,6 @@ var Cafe = {
   activateMatch(match_index) {
     Cafe.active_match = "partido" + match_index;
 
-    // Reset active team class to local
-    Cafe.active_team = "local";
-
     // Disabling all of the matches
     $(".encuentro").removeClass("active")
     $(".encuentro").addClass("deactivated");
@@ -144,7 +142,7 @@ var Cafe = {
     //          animation.
     setTimeout(function() {
       $("#cortina").addClass("animation-" + direction);
-    });
+    }, 10);
   },
   nextMatch: function() {
     if (Cafe.active_match_index < Cafe.number_of_matches) {
@@ -174,6 +172,47 @@ var Cafe = {
       Cafe.updateMainButton();
     }
   },
+  compileBidData: function() {
+    Cafe.roundMetadata.il = $("#game_metadata").data("idliga");
+    Cafe.roundMetadata.j = $("#game_metadata").data("jornada");
+    Cafe.roundMetadata.p = [];
+    $(".encuentro").each(function(i, encuentro) {
+      var matchId = $(encuentro).data("id-encuentro");
+      var result1x2 = $(encuentro).find(".selected-1x2").data("value");
+      // Iterate over home players and get playerids associated with the number or goals
+      var homePlayersData = []
+      $(encuentro).find(".local-items .selected").each(function(i, player) {
+        var playerId = $(player).data("id-jugador");
+        var playerGoals = $(player).find(".js-item-counter").text();
+        var playerDataString = playerId + "-" + playerGoals;
+        homePlayersData.push(playerDataString);
+      });
+
+      // Iterate over away players and get playerids associated with the number or goals
+      var awayPlayersData = []
+      $(encuentro).find(".visitante-items .selected").each(function(i, player) {
+        var playerId = $(player).data("id-jugador");
+        var playerGoals = $(player).find(".js-item-counter").text();
+        var playerDataString = playerId + "-" + playerGoals;
+        awayPlayersData.push(playerDataString);
+      });
+
+      // Compile all the data for the bid
+      var matchTagName = "p"+matchId;
+      Cafe.roundMetadata.p[i] = { 
+        [matchTagName]: {
+          "q": result1x2,
+          "l": homePlayersData,
+          "v": awayPlayersData,
+        }
+      };
+
+/*    for (i=1; i<=Cafe.number_of_matches; i++) {
+      Cafe.roundMetadata.p["p"+i] = {"q":"x", "l":[], "v":[]};
+    }
+*/
+    });
+  },
   eIncrClicked: function (e) {
     e.preventDefault();
     var itemEl = $(this).parents(".js-item");
@@ -197,7 +236,6 @@ var Cafe = {
     });
   },
   updateItem: function (itemEl, delta) {
-    var price = +itemEl.data("item-price");
     var count = +itemEl.data("item-count") || 0;
     var counterEl = $(".js-item-counter", itemEl);
     counterEl.text(count ? count : 1);
@@ -384,7 +422,10 @@ var Cafe = {
   },
 */
   sendBidData: function() {
-    $("body").css({"color": "red"});
+    Cafe.compileBidData();
+    Telegram.WebApp.sendData(
+      JSON.stringify(Cafe.roundMetadata)
+    );
   },
   mainBtnClicked: function () {
     if (Cafe.isLoading || Cafe.isClosed) {

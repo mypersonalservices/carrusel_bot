@@ -26,8 +26,8 @@
     </div>
     <div id="cortina"></div>
     <div class="jornada round-page">
-      {% for partido, dp in round_data.items() %}
-      <div id="{{ partido }}" class="encuentro {% if loop.first %}active{% else %}deactivated{% endif %}">
+      {% for partido, dp in game_data.matches.items() %}
+      <div id="{{ partido }}" class="encuentro {% if loop.first %}active{% else %}deactivated{% endif %}" data-id-equipo-local="{{ dp.local.id }}" data-id-equipo-visitante="{{ dp.visitante.id }}" data-id-encuentro="{{ dp.id_encuentro }}">
         <section class="pronostico pronostico-items">
           <div class="resultado-equipos">
             <div class="escudo-item-photo">
@@ -42,9 +42,9 @@
           <div class="pie-pronostico">
             <div class="nombre-equipo nombre-equipo-local">{{ dp.local.nombre }}</div>
             <div class="resultado-1x2">
-              <span class="uno">1</span>
-              <span class="equis selected-1x2">X</span>
-              <span class="dos">2</span>
+              <span class="uno" data-value="1">1</span>
+              <span class="equis selected-1x2" data-value="x">X</span>
+              <span class="dos" data-value="2">2</span>
             </div>
             <div class="nombre-equipo nombre-equipo-visitante">{{ dp.visitante.nombre }}</div>
           </div>
@@ -52,7 +52,7 @@
         <section class="jugadores">
           <div class="local local-items">
             {% for jugador in dp.local.jugadores %}
-            <div class="cafe-item js-item" data-item-id="{{jugador.id}}" data-item-price="1490">
+            <div class="cafe-item js-item" data-id-jugador="{{jugador.id}}">
               <div class="cafe-item-counter js-item-counter">1</div>
               <div class="cafe-item-photo">
                 <picture class="cafe-item-lottie js-item-lottie">
@@ -128,9 +128,10 @@
       </div>
       {% endfor %}
     </div>
-    <div id="game_metadata">
-      <div id="idliga" data-item-liga="123123123"></div>
-      <div id="jornada" data-item-jornada="12"></div>
+    <div id="game_metadata" 
+      data-idliga="{{ game_data.id_liga }}" 
+      data-jornada="{{ game_data.jornada }}">
+    </div>
     </div>
     <script src="https://tg.dev/js/jquery.min.js"></script>
     <script src="assets/js/jquery.mobile.custom.min.js"></script>
