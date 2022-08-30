@@ -55,6 +55,11 @@ var Cafe = {
   showTeamPlayers: function() {
     scoreboard_id = $(this)[0].id;
     scoreboard_id_array = scoreboard_id.split("-");
+    // If is the same already selected do nothing
+//   if (Cafe.active_team == scoreboard_id_array[1] &&
+//       Cafe.active_match == scoreboard_id_array[2]) {
+//      return false
+//    }
     Cafe.active_team = scoreboard_id_array[1];
     Cafe.active_match = scoreboard_id_array[2];
     clicked_team = $("#" + Cafe.active_match + " .jugadores ." + Cafe.active_team);
