@@ -1,0 +1,5 @@
+# Avoid everything in this folder except the .gitignore itself
+# this way keeps us inside the git standard, unlike .gitkeep
+# that is not a part of the git standard
+*
+!.gitignore
