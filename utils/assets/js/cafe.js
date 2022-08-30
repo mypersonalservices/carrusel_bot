@@ -44,6 +44,8 @@ var Cafe = {
     });
     Telegram.WebApp.MainButton.setParams({
       text_color: "#fff",
+      text: "SIGUIENTE PARTIDO",
+      color: "#50AA50",
       is_visible: true,
     }).onClick(Cafe.mainBtnClicked);
     Telegram.WebApp.BackButton.show();
@@ -391,6 +393,13 @@ var Cafe = {
   backBtnClicked: function() {
       if (!Cafe.inFirstMatch()) {
         Cafe.previousMatch();
+        Cafe.updateMainButton();
+      } else {
+        // If already in first match and push the back button, we
+        // allow users to close the bot, but first we warn them
+        // that no data will be saved.
+        Telegram.WebApp.showConfirm(
+          "OJO! Si sales del bot no se guardará la apuesta. ¿Deseas salir igualmente?", Telegram.WebApp.close());
       }
   },
   eStatusClicked: function () {
