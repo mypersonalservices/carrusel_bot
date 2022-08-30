@@ -34,6 +34,8 @@ var Cafe = {
     }
 */
     $(".marcador").on("click", Cafe.showTeamPlayers);
+    $("#mensaje-ok").on("click", Cafe.leaveApp);
+    $("#mensaje-cancelar").on("click", Cafe.dismissWarning);
     $(".escudo-item-photo").on("click", Cafe.toggleWinner);
     $(".js-item-incr-btn").on("click", Cafe.eIncrClicked);
     $(".js-item-decr-btn").on("click", Cafe.eDecrClicked);
@@ -44,11 +46,10 @@ var Cafe = {
     });
     Telegram.WebApp.MainButton.setParams({
       text_color: "#fff",
-      text: "SIGUIENTE PARTIDO",
+      text: "HACER APUESTA!",
       color: "#50AA50",
-      is_visible: true,
+      is_visible: false,
     }).onClick(Cafe.mainBtnClicked);
-    Telegram.WebApp.BackButton.show();
     Telegram.WebApp.BackButton.onClick(Cafe.backBtnClicked);
     initRipple();
   },
@@ -117,6 +118,7 @@ var Cafe = {
     Cafe.active_team = "local";
 
     // Disabling all of the matches
+    $(".encuentro").removeClass("active")
     $(".encuentro").addClass("deactivated");
 
     // Always display the top of the list
@@ -124,6 +126,16 @@ var Cafe = {
 
     // Make new current match visible
     $("#" + Cafe.active_match).removeClass("deactivated");
+    $("#" + Cafe.active_match).addClass("active");
+  },
+  curtainAnimation: function(direction) {
+    $("#cortina").removeClass("animation-rtl animation-ltr");
+    // WARNING: This timeout is mandatory, because adding and removing the same
+    //          class from the same element in succession does not trigger the 
+    //          animation.
+    setTimeout(function() {
+      $("#cortina").addClass("animation-" + direction);
+    });
   },
   nextMatch: function() {
     if (Cafe.active_match_index < Cafe.number_of_matches) {
@@ -131,6 +143,7 @@ var Cafe = {
       Cafe.active_match_index += 1;
 
       // Show new current match
+      Cafe.curtainAnimation("rtl");
       Cafe.activateMatch(Cafe.active_match_index);
 
       // Update telegram main button (if last match, action should be 
@@ -144,6 +157,7 @@ var Cafe = {
       Cafe.active_match_index -= 1;
       
       // Show new current match
+      Cafe.curtainAnimation("ltr");
       Cafe.activateMatch(Cafe.active_match_index);
 
       // Update telegram main button (if last match, action should be 
@@ -272,7 +286,7 @@ var Cafe = {
   updateMainButton: function () {
     var mainButton = Telegram.WebApp.MainButton;
     if (Cafe.inLastMatch) {
-      if (Cafe.isLoading) {
+/*      if (Cafe.isLoading) {
         mainButton
           .setParams({
             is_visible: true,
@@ -288,14 +302,10 @@ var Cafe = {
           })
           .hideProgress();
       }
+*/
+      mainButton.show();
     } else {
-      mainButton
-        .setParams({
-          is_visible: true,
-          text: "SIGUIENTE PARTIDO",
-          color: "#50AA50",
-        })
-        .hideProgress();
+      mainButton.hide();
     }
   },
 /*  updateTotalPrice: function () {
@@ -401,20 +411,14 @@ var Cafe = {
     }
   },
   backBtnClicked: function() {
-      if (!Cafe.inFirstMatch()) {
-        Cafe.previousMatch();
-        Cafe.updateMainButton();
-      } else {
-        // If already in first match and push the back button, we
-        // allow users to close the bot, but first we warn them
-        // that no data will be saved.
-        Telegram.WebApp.showConfirm(
-          "OJO! Si sales del bot no se guardará la apuesta. ¿Deseas salir igualmente?", 
-          function (okClicked) {
-            if(okClicked) {Telegram.WebApp.close();}
-          }
-        );
-      }
+    // Warn user that leaving the webapp implies not saving the bid
+    $("#avisos").removeClass("aviso-off");
+  },
+  leaveApp: function() {
+    Telegram.WebApp.close();
+  },
+  dismissWarning: function() {
+    $("#avisos").addClass("aviso-off");
   },
   eStatusClicked: function () {
     Cafe.hideStatus();

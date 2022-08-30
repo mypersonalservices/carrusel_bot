@@ -7,22 +7,25 @@ from jinja2 import Template
 from mockdata import fake
 
 
-def get_mock_round_data(matches=2):
+current_path = Path(__file__).parent.absolute()
+
+
+def get_mock_round_data(matches=5):
     current_team_id = 100
     current_player_id = 100
     matches_data = {}
     for round_match in range(matches):
         round_match_id = round_match + 1
         current_match = "partido" + str(round_match)
-        local_team_id = current_team_id
-        local_team_name = fake.team_name()
+        home_team_id = current_team_id
+        home_team_name = fake.team_name()
         current_team_id +=1
-        visitor_team_id = current_team_id
-        visitor_team_name = fake.team_name()
+        away_team_id = current_team_id
+        away_team_name = fake.team_name()
         current_team_id +=1
         
-        # Local Team 25 Players
-        local_team_players = []
+        # Home Team 25 Players
+        home_team_players = []
         for i in range(25):
             current_player = {
                 'id': current_player_id,
@@ -30,11 +33,11 @@ def get_mock_round_data(matches=2):
                 'foto': 'https://cdn.jsdelivr.net/gh/cadenaservices/carrusel_data_bot@master/players/' + str(current_player_id) + "_small.png",
                 'posicion': fake.player_type()
             }
-            local_team_players.append(current_player)
+            home_team_players.append(current_player)
             current_player_id += 1
 
-        # Visitor Team 25 Players
-        visitor_team_players = []
+        # Away Team 25 Players
+        away_team_players = []
         for i in range(25):
             current_player = {
                 'id': current_player_id,
@@ -42,21 +45,21 @@ def get_mock_round_data(matches=2):
                 'foto': 'https://cdn.jsdelivr.net/gh/cadenaservices/carrusel_data_bot@master/players/' + str(current_player_id) + "_small.png",
                 'posicion': fake.player_type()
             }
-            visitor_team_players.append(current_player)
+            away_team_players.append(current_player)
             current_player_id += 1
 
         current_match_data = {
             'local': {
-                'id': local_team_id,
-                'nombre': local_team_name,
-                'escudo': 'https://cdn.jsdelivr.net/gh/cadenaservices/carrusel_data_bot@master/teams/' + str(local_team_id) + '_small.png',
-                'jugadores': local_team_players,
+                'id': home_team_id,
+                'nombre': home_team_name,
+                'escudo': 'https://cdn.jsdelivr.net/gh/cadenaservices/carrusel_data_bot@master/teams/' + str(home_team_id) + '_small.png',
+                'jugadores': home_team_players,
             },
             'visitante': {
-                'id': visitor_team_id,
-                'nombre': visitor_team_name,
-                'escudo': 'https://cdn.jsdelivr.net/gh/cadenaservices/carrusel_data_bot@master/teams/' + str(visitor_team_id) + '_small.png',
-                'jugadores': visitor_team_players,
+                'id': away_team_id,
+                'nombre': away_team_name,
+                'escudo': 'https://cdn.jsdelivr.net/gh/cadenaservices/carrusel_data_bot@master/teams/' + str(away_team_id) + '_small.png',
+                'jugadores': away_team_players,
             }
         }
 
@@ -66,7 +69,7 @@ def get_mock_round_data(matches=2):
 
 def render_webapp_round():
     # Load webapp template
-    with open("webapp_template.html", "r+") as f:
+    with open(current_path / "webapp_template.html", "r+") as f:
         webapp_template = Template(f.read())
     
     # Render template with given data
@@ -74,7 +77,7 @@ def render_webapp_round():
     rendered_template = webapp_template.render(round_data=data_to_render)
     
     # Build rendered webapp
-    output_dir = Path("./build")
+    output_dir = current_path / "build"
     # # Remove previous builds and use a clean build dir
     shutil.rmtree(output_dir, ignore_errors=True)
     output_dir.mkdir(exist_ok=True,  parents=True)
@@ -83,7 +86,7 @@ def render_webapp_round():
     with open(output_path, "w+") as f:
         f.write(rendered_template)
     # # Copy necessary assets to build folder
-    source_assets_dir = Path("./assets")
+    source_assets_dir = current_path / "assets"
     destination_assets_dir = output_dir / "assets"
     shutil.copytree(source_assets_dir, destination_assets_dir, dirs_exist_ok=True)
 

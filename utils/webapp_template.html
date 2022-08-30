@@ -17,9 +17,17 @@
     <link href="assets/css/cafe.css" rel="stylesheet">
   </head>
   <body>
+    <div id="avisos" class="aviso-off">
+      <div id="contenido-aviso">
+        <div id="mensaje">¡¡¡OJO!!! Si sales ahora no se guardará tu apuesta, ¿deseas cerrar la ventana igualmente?</div>
+        <div id="mensaje-ok" class="mensaje-boton">Sí, descartar</div>
+        <div id="mensaje-cancelar" class="mensaje-boton">No, continuemos!</div>
+      </div>
+    </div>
+    <div id="cortina"></div>
     <div class="jornada round-page">
       {% for partido, dp in round_data.items() %}
-      <div id="{{ partido }}" class="encuentro {% if not loop.first %}deactivated{% endif %}">
+      <div id="{{ partido }}" class="encuentro {% if loop.first %}active{% else %}deactivated{% endif %}">
         <section class="pronostico pronostico-items">
           <div class="resultado-equipos">
             <div class="escudo-item-photo">
@@ -120,9 +128,28 @@
       </div>
       {% endfor %}
     </div>
+    <div id="game_metadata">
+      <div id="idliga" data-item-liga="123123123"></div>
+      <div id="jornada" data-item-jornada="12"></div>
+    </div>
     <script src="https://tg.dev/js/jquery.min.js"></script>
-    <script src="https://tg.dev/js/tgsticker.js?27"></script>
     <script src="assets/js/cafe.js"></script>
-    <script>Cafe.init({"apiUrl":"\/cafe\/api","userId":0,"userHash":null});</script>
+    <script src="assets/js/jquery.mobile.custom.min.js"></script>
+    <script>Cafe.init({"apiUrl":"\/cafe\/api","userId":0,"userHash":null});
+    </script>
+    <script>
+        $(function (){
+            $("body").on("swipeleft", swipeleftHandler);
+            function swipeleftHandler(event) {
+                Cafe.nextMatch();
+            }
+        });
+        $(function (){
+            $("body").on("swiperight", swiperightHandler);
+            function swiperightHandler(event) {
+                Cafe.previousMatch();
+            }
+        });
+    </script>
   </body>
 </html>
