@@ -163,7 +163,7 @@ var Cafe = {
   compileBetData: function() {
     Cafe.bettingRoundMetadata.il = $("#game_metadata").data("idliga");
     Cafe.bettingRoundMetadata.j = $("#game_metadata").data("jornada");
-    Cafe.bettingRoundMetadata.p = [];
+    Cafe.bettingRoundMetadata.p = {};
     $(".encuentro").each(function(i, encuentro) {
       var matchId = $(encuentro).data("id-encuentro");
       var result1x2 = $(encuentro).find(".selected-1x2").data("value");
@@ -186,13 +186,10 @@ var Cafe = {
       });
 
       // Compile all the data for the bet
-      var matchTagName = "p"+matchId;
-      Cafe.bettingRoundMetadata.p[i] = { 
-        [matchTagName]: {
+      Cafe.bettingRoundMetadata.p[matchId] = {
           "q": result1x2,
           "l": homePlayersData,
           "v": awayPlayersData,
-        }
       };
 
 /*    for (i=1; i<=Cafe.number_of_matches; i++) {
