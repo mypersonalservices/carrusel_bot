@@ -7,9 +7,8 @@
   };
 })(jQuery);
 
+
 var Cafe = {
-  modeOrder: false,
-  totalPrice: 0,
   active_match_index: 1,
   active_match: "partido1",
   active_team: "local",
@@ -32,9 +31,6 @@ var Cafe = {
     $(".js-item-incr-btn").on("click", Cafe.eIncrClicked);
     $(".js-item-decr-btn").on("click", Cafe.eDecrClicked);
     $(".js-status").on("click", Cafe.eStatusClicked);
-    $(".js-order-comment-field").each(function () {
-      autosize(this);
-    });
     Telegram.WebApp.MainButton.setParams({
       text_color: "#fff",
       text: "HACER APUESTA!",
@@ -50,31 +46,6 @@ var Cafe = {
   },
   swiperightHandler: function(event) {
     Cafe.previousMatch();
-  },
-  showTeamPlayers: function() {
-    scoreboard_id = $(this)[0].id;
-    scoreboard_id_array = scoreboard_id.split("-");
-    Cafe.active_team = scoreboard_id_array[1];
-    Cafe.active_match = scoreboard_id_array[2];
-    clicked_team = $("#" + Cafe.active_match + " .jugadores ." + Cafe.active_team);
-    if (Cafe.active_team == "local") {
-      non_clicked_team = $("#" + Cafe.active_match + " .jugadores .visitante");
-      opposite_team_class = "visitante"
-    } else {
-      non_clicked_team = $("#" + Cafe.active_match + " .jugadores .local");
-      opposite_team_class = "local"
-    }
-    // Activate clicked team players and deactivate
-    // the other one
-    clicked_team.removeClass("deactivated");
-    non_clicked_team.addClass("deactivated");
-    // Always display the top of the list
-    window.scrollTo(0, 0);
-    // Add shadow to scoreboard box of the clicked team to differentiate
-    scoreboard_to_select = $("#marcador-" + Cafe.active_team + "-" + Cafe.active_match);
-    scoreboard_to_unselect = $("#marcador-" + opposite_team_class + "-" + Cafe.active_match);
-    scoreboard_to_select.addClass("selected-scoreboard-side");
-    scoreboard_to_unselect.removeClass("selected-scoreboard-side");
   },
   toggleWinner: function() {
     clicked_team = $(this).find("img");
@@ -104,19 +75,53 @@ var Cafe = {
   clean1x2: function (match_id) {
     $("#" + match_id + " .resultado-1x2").find("span").removeClass("selected-1x2");
   },
-  activateMatch(match_index) {
-    Cafe.active_match = "partido" + match_index;
+  showTeamPlayers: function() {
+    // Get match and team to activate
+    scoreboard_id = $(this)[0].id;
+    scoreboard_id_array = scoreboard_id.split("-");
+    match_to_activate = scoreboard_id_array[2];
+    team_to_activate = scoreboard_id_array[1];
+
+    Cafe.activateMatchAndTeam(match_to_activate, team_to_activate);
+  },
+  activateMatchAndTeam(match_to_activate, team_to_activate) {
+    // Set match and team to activate
+    Cafe.active_match = match_to_activate;
+    Cafe.active_team = team_to_activate;
+
+    // Oposite team. Team to deactivate
+    if (Cafe.active_team == "local") {
+      screen_to_deactivate = $("#" + Cafe.active_match + " .jugadores .visitante");
+      opposite_team_class = "visitante"
+    } else {
+      screen_to_deactivate = $("#" + Cafe.active_match + " .jugadores .local");
+      opposite_team_class = "local"
+    }
+
+    // Get screens to activate/deactivate
+    screen_to_activate = $("#" + Cafe.active_match + " .jugadores ." + Cafe.active_team);
+    screen_to_deactivate = $("#" + Cafe.active_match + " .jugadores ." + opposite_team_class);
+
+    // Activate screen associated with the newly activated match and team
+    screen_to_activate.removeClass("deactivated");
+    screen_to_deactivate.addClass("deactivated");
 
     // Disabling all of the matches
     $(".encuentro").removeClass("active")
     $(".encuentro").addClass("deactivated");
 
-    // Always display the top of the list
+    // Always display the top of the list of the local team
     window.scrollTo(0, 0);
 
     // Make new current match visible
     $("#" + Cafe.active_match).removeClass("deactivated");
     $("#" + Cafe.active_match).addClass("active");
+
+    // Add shadow to scoreboard box of the clicked team to differentiate
+    scoreboard_to_select = $("#marcador-" + Cafe.active_team + "-" + Cafe.active_match);
+    scoreboard_to_unselect = $("#marcador-" + opposite_team_class + "-" + Cafe.active_match);
+    scoreboard_to_select.addClass("selected-scoreboard-side");
+    scoreboard_to_unselect.removeClass("selected-scoreboard-side");
   },
   curtainAnimation: function(direction) {
     $("#cortina").removeClass("animation-rtl animation-ltr");
@@ -134,7 +139,7 @@ var Cafe = {
 
       // Show new current match
       Cafe.curtainAnimation("rtl");
-      Cafe.activateMatch(Cafe.active_match_index);
+      Cafe.activateMatchAndTeam("partido" + Cafe.active_match_index, "local");
 
       // Update telegram main button (if last match, action should be 
       // Make bet! or similar)
@@ -148,7 +153,7 @@ var Cafe = {
       
       // Show new current match
       Cafe.curtainAnimation("ltr");
-      Cafe.activateMatch(Cafe.active_match_index);
+      Cafe.activateMatchAndTeam("partido" + Cafe.active_match_index, "local");
 
       // Update telegram main button (if last match, action should be 
       // Make bet! or similar)
@@ -205,12 +210,6 @@ var Cafe = {
     e.preventDefault();
     var itemEl = $(this).parents(".js-item");
     Cafe.incrClicked(itemEl, -1);
-  },
-  getOrderItem: function (itemEl) {
-    var id = itemEl.data("item-id");
-    return $(".js-order-item").filter(function () {
-      return $(this).data("item-id") == id;
-    });
   },
   updateItem: function (itemEl, delta) {
     var count = +itemEl.data("item-count") || 0;
