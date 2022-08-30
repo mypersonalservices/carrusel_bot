@@ -48,18 +48,25 @@ var Cafe = {
   showTeamPlayers: function() {
     scoreboard_id = $(this)[0].id;
     scoreboard_id_array = scoreboard_id.split("-");
-    team_class = "." + scoreboard_id_array[1];
-    match_id = "#" + scoreboard_id_array[2];
-    clicked_team = $(match_id + " .jugadores " + team_class);
-    if (team_class == ".local") {
-      non_clicked_team = $(match_id + " .jugadores .visitante");
+    team_class = scoreboard_id_array[1];
+    match_id = scoreboard_id_array[2];
+    clicked_team = $("#" + match_id + " .jugadores ." + team_class);
+    if (team_class == "local") {
+      non_clicked_team = $("#" + match_id + " .jugadores .visitante");
+      opposite_team_class = "visitante"
     } else {
-      non_clicked_team = $(match_id + " .jugadores .local");
+      non_clicked_team = $("#" + match_id + " .jugadores .local");
+      opposite_team_class = "local"
     }
     // Activate clicked team players and deactivate
     // the other one
     clicked_team.removeClass("deactivated");
     non_clicked_team.addClass("deactivated");
+    // Add shadow to scoreboard box of the clicked team to differentiate
+    scoreboard_to_select = $("#marcador-" + team_class + "-" + match_id);
+    scoreboard_to_unselect = $("#marcador-" + opposite_team_class + "-" + match_id);
+    scoreboard_to_select.addClass("selected-scoreboard-side");
+    scoreboard_to_unselect.removeClass("selected-scoreboard-side");
   },
   toggleWinner: function() {
     clicked_team = $(this).find("img");

@@ -205,6 +205,10 @@ body {
     color: #FF0000;
   }
 
+  .selected-scoreboard-side {
+    box-shadow: inset 0 0 5px 0px #555555;
+  }
+
   /* Esta clase "order-mode" se activa cuando se usa la función
    * de javascript "toggleMode" */
   body.order-mode .cafe-items {
