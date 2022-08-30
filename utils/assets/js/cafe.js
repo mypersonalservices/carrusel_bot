@@ -69,6 +69,8 @@ var Cafe = {
     // the other one
     clicked_team.removeClass("deactivated");
     non_clicked_team.addClass("deactivated");
+    // Always display the top of the list
+    window.scrollTo(0, 0);
     // Add shadow to scoreboard box of the clicked team to differentiate
     scoreboard_to_select = $("#marcador-" + Cafe.active_team + "-" + Cafe.active_match);
     scoreboard_to_unselect = $("#marcador-" + opposite_team_class + "-" + Cafe.active_match);
@@ -111,6 +113,9 @@ var Cafe = {
 
     // Disabling all of the matches
     $(".encuentro").addClass("deactivated");
+
+    // Always display the top of the list
+    window.scrollTo(0, 0);
 
     // Make new current match visible
     $("#" + Cafe.active_match).removeClass("deactivated");
@@ -254,10 +259,10 @@ var Cafe = {
     return s.join(dec);
   },
   inFirstMatch: function() {
-    return Cafe.current_match_index == 1;
+    return Cafe.active_match_index == 1;
   },
   inLastMatch: function() {
-    return Cafe.current_match_index == Cafe.number_of_matches;
+    return Cafe.active_match_index == Cafe.number_of_matches;
   },
   updateMainButton: function () {
     var mainButton = Telegram.WebApp.MainButton;
@@ -399,7 +404,11 @@ var Cafe = {
         // allow users to close the bot, but first we warn them
         // that no data will be saved.
         Telegram.WebApp.showConfirm(
-          "OJO! Si sales del bot no se guardará la apuesta. ¿Deseas salir igualmente?", Telegram.WebApp.close());
+          "OJO! Si sales del bot no se guardará la apuesta. ¿Deseas salir igualmente?", 
+          function (okClicked) {
+            if(okClicked) {Telegram.WebApp.close();}
+          }
+        );
       }
   },
   eStatusClicked: function () {
