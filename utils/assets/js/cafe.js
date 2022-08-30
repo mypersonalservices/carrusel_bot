@@ -23,17 +23,6 @@ var Cafe = {
     Cafe.userHash = options.userHash;
     Cafe.number_of_matches = $(".encuentro").length;
     $("body").show();
-/*  PEI REMOVED
-    if (
-      !Telegram.WebApp.initDataUnsafe ||
-      !Telegram.WebApp.initDataUnsafe.query_id
-    ) {
-      Cafe.isClosed = true;
-      $("body").addClass("closed");
-      Cafe.showStatus("Cafe is temporarily closed");
-      return;
-    }
-*/
     $("body").on("swipeleft", Cafe.swipeleftHandler);
     $("body").on("swiperight", Cafe.swiperightHandler);
     $(".marcador").on("click", Cafe.showTeamPlayers);
@@ -42,7 +31,6 @@ var Cafe = {
     $(".escudo-item-photo").on("click", Cafe.toggleWinner);
     $(".js-item-incr-btn").on("click", Cafe.eIncrClicked);
     $(".js-item-decr-btn").on("click", Cafe.eDecrClicked);
-//    $(".js-order-edit").on("click", Cafe.eEditClicked);
     $(".js-status").on("click", Cafe.eStatusClicked);
     $(".js-order-comment-field").each(function () {
       autosize(this);
@@ -66,11 +54,6 @@ var Cafe = {
   showTeamPlayers: function() {
     scoreboard_id = $(this)[0].id;
     scoreboard_id_array = scoreboard_id.split("-");
-    // If is the same already selected do nothing
-//   if (Cafe.active_team == scoreboard_id_array[1] &&
-//       Cafe.active_match == scoreboard_id_array[2]) {
-//      return false
-//    }
     Cafe.active_team = scoreboard_id_array[1];
     Cafe.active_match = scoreboard_id_array[2];
     clicked_team = $("#" + Cafe.active_match + " .jugadores ." + Cafe.active_team);
@@ -223,12 +206,6 @@ var Cafe = {
     var itemEl = $(this).parents(".js-item");
     Cafe.incrClicked(itemEl, -1);
   },
-/*
-  eEditClicked: function (e) {
-    e.preventDefault();
-    Cafe.toggleMode(false);
-  },
-*/
   getOrderItem: function (itemEl) {
     var id = itemEl.data("item-id");
     return $(".js-order-item").filter(function () {
@@ -256,17 +233,6 @@ var Cafe = {
     }
     counterEl.css("animation-name", anim_name);
     itemEl.toggleClass("selected", count > 0);
-/*
-    var orderItemEl = Cafe.getOrderItem(itemEl);
-    var orderCounterEl = $(".js-order-item-counter", orderItemEl);
-    orderCounterEl.text(count ? count : 1);
-    orderItemEl.toggleClass("selected", count > 0);
-    var orderPriceEl = $(".js-order-item-price", orderItemEl);
-    var item_price = count * price;
-    orderPriceEl.text(Cafe.formatPrice(item_price));
-
-    Cafe.updateTotalPrice();
-*/
   },
   incrClicked: function (itemEl, delta) {
     if (Cafe.isLoading || Cafe.isClosed) {
@@ -333,94 +299,11 @@ var Cafe = {
   updateMainButton: function () {
     var mainButton = Telegram.WebApp.MainButton;
     if (Cafe.inLastMatch()) {
-/*      if (Cafe.isLoading) {
-        mainButton
-          .setParams({
-            is_visible: true,
-            color: "#65c36d",
-          })
-          .showProgress();
-      } else {
-        mainButton
-          .setParams({
-            is_visible: true,
-            text: "HACER APUESTA!",
-            color: "#50AA50",
-          })
-          .hideProgress();
-      }
-*/
       mainButton.show();
     } else {
       mainButton.hide();
     }
   },
-/*  updateTotalPrice: function () {
-    var total_price = 0;
-    $(".js-item").each(function () {
-      var itemEl = $(this);
-      var price = +itemEl.data("item-price");
-      var count = +itemEl.data("item-count") || 0;
-      total_price += price * count;
-    });
-    Cafe.totalPrice = total_price;
-    Cafe.updateMainButton();
-  },
-  getOrderData: function () {
-    var order_data = [];
-    $(".js-item").each(function () {
-      var itemEl = $(this);
-      var id = itemEl.data("item-id");
-      var count = +itemEl.data("item-count") || 0;
-      if (count > 0) {
-        order_data.push({ id: id, count: count });
-      }
-    });
-    return JSON.stringify(order_data);
-  },
-  toggleMode: function (mode_order) {
-    Cafe.modeOrder = mode_order;
-    var anim_duration, match;
-    try {
-      anim_duration = window
-        .getComputedStyle(document.body)
-        .getPropertyValue("--page-animation-duration");
-      if ((match = /([\d\.]+)(ms|s)/.exec(anim_duration))) {
-        anim_duration = +match[1];
-        if (match[2] == "s") {
-          anim_duration *= 1000;
-        }
-      } else {
-        anim_duration = 400;
-      }
-    } catch (e) {
-      anim_duration = 400;
-    }
-    if (mode_order) {
-      var height = $(".cafe-items").height();
-      $(".cafe-order-overview").show();
-      $(".cafe-items").css("maxHeight", height).redraw();
-      $("body").addClass("order-mode");
-      $(".js-order-comment-field").each(function () {
-        autosize.update(this);
-      });
-      Telegram.WebApp.expand();
-    } else {
-      $("body").removeClass("order-mode");
-      setTimeout(function () {
-        $(".cafe-items").css("maxHeight", "");
-        $(".cafe-order-overview").hide();
-      }, anim_duration);
-    }
-    Cafe.updateMainButton();
-  },
-  toggleLoading: function (loading) {
-    Cafe.isLoading = loading;
-    Cafe.updateMainButton();
-    $("body").toggleClass("loading", !!Cafe.isLoading);
-    Cafe.updateTotalPrice();
-  },
-*/
   sendBidData: function() {
     Cafe.compileBidData();
     Telegram.WebApp.sendData(
@@ -432,38 +315,6 @@ var Cafe = {
       return false;
     }
     Cafe.sendBidData();
-/*    if (Cafe.modeOrder) {
-      var comment = $(".js-order-comment-field").val();
-      var params = {
-        order_data: Cafe.getOrderData(),
-        comment: comment,
-      };
-      if (Cafe.userId && Cafe.userHash) {
-        params.user_id = Cafe.userId;
-        params.user_hash = Cafe.userHash;
-      }
-      Cafe.toggleLoading(true);
-      Cafe.apiRequest("makeOrder", params, function (result) {
-        Cafe.toggleLoading(false);
-        if (result.ok) {
-          Telegram.WebApp.close();
-        }
-        if (result.error) {
-          Cafe.showStatus(result.error);
-        }
-      });
-
-    } else {
-//      Cafe.toggleMode(true);
-        // For now, we don't use "summary" modes as the Cafe example so
-        // here we change the main button behaviour to fit our needs
-        if (Cafe.inLastMatch()) {
-            // Send bid data to the bot and close
-        } else {
-            Cafe.nextMatch();
-        }
-    }
-*/
   },
   backBtnClicked: function() {
     // Warn user that leaving the webapp implies not saving the bid

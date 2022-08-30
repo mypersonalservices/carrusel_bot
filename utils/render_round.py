@@ -5,13 +5,13 @@ import shutil
 
 from jinja2 import Template
 
-from mockdata import fake
-
 
 current_path = Path(__file__).parent.absolute()
 
 
 def get_mock_round_data(matches=5):
+    from mockdata import fake
+
     current_team_id = 100
     current_player_id = 100
     matches_data = {}
@@ -76,17 +76,21 @@ def get_mock_round_data(matches=5):
     return game_data
 
 
-def render_webapp_round():
+def render_devel_webapp_round():
+    mock_data = get_mock_round_data()
+    render_webapp_round(data_to_render=mock_data, destination_dir="build/devel")
+
+
+def render_webapp_round(data_to_render, destination_dir="build"):
     # Load webapp template
     with open(current_path / "webapp_template.html", "r+") as f:
         webapp_template = Template(f.read())
     
     # Render template with given data
-    data_to_render = get_mock_round_data()
     rendered_template = webapp_template.render(game_data=data_to_render)
     
     # Build rendered webapp
-    output_dir = current_path / "build"
+    output_dir = current_path / destination_dir
     # # Remove previous builds and use a clean build dir
     shutil.rmtree(output_dir, ignore_errors=True)
     output_dir.mkdir(exist_ok=True,  parents=True)
@@ -102,4 +106,5 @@ def render_webapp_round():
 
 
 if __name__ == "__main__":
-    render_webapp_round()
+    render_devel_webapp_round()
+    print("Mock webapp built! From CLI only mock webapps are generated, if you want to create a real production webapp, import and use in your code the 'render_webapp_round' function present in this file passing real data.")
