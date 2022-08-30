@@ -31,6 +31,20 @@ def avoid_execute_script_more_than_once(entry_function, script_name):
                   "\nThis script is already running in a process with pid: {}".format(f.read()))
 
 
+# ### EXCEPTIONS AND ERRORS ### #
+class DbEntryClosedException(Exception):
+    pass
+
+ErrorSeasonClosed = {
+    "error": "ERROR_0001",
+    "desc": "Season is closed."
+}
+
+ErrorBettingRoundClosed = {
+    "error": "ERROR_0002",
+    "desc": "Betting round is closed."
+}
+# ### END OF EXCEPTIONS AND ERRORS ### #
 
 
 # ### LOGGING ### #
@@ -56,3 +70,4 @@ def get_handler_for_compressed_rotating_file_handler():
     return file_handler
 
 compressed_rotating_file_handler = get_handler_for_compressed_rotating_file_handler()
+# ### END OF LOGGING ### #

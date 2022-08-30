@@ -1,4 +1,5 @@
 import atexit
+import datetime
 import json
 import logging
 import time
@@ -9,7 +10,7 @@ from telebot import types as bot_types, TeleBot
 from telebot.apihelper import ApiException
 from telebot.formatting import escape_markdown as _e
 from conf import get_settings
-from utils.auxiliar import truncate_text
+from utils.auxiliar import truncate_text, DbEntryClosedException
 
 
 settings = get_settings()
@@ -118,25 +119,26 @@ def register_bot_actions(bot):
             season_id = temp_bet_data["il"]   # id_liga
             betting_round_number = temp_bet_data["j"] # jornada
 
-            # Ensure the given betting round is not closed already
-            current_betting_round = BettingRound.get_or_none(season_id=season_id, betting_round_number=betting_round_number)
-            if not current_betting_round or not current_betting_round.is_open:
-                bot.send_message(chat_id, _e(f"ERROR: La jornada {betting_round_number} está cerrada y no se pueden enviar apuestas."))
-                return
+            # Get betting round
+            current_betting_round = BettingRound.get(season_id=season_id, betting_round_number=betting_round_number)
 
             # Store bet (new or update)
-            (Bet.insert(betting_round=current_betting_round, owner=user, data=bet_data)
-            .on_conflict(
-                conflict_target=[Bet.betting_round_id, Bet.owner_id],
-                preserve=[Bet.data]
-            )
-            .execute())
+            bet, created = Bet.create_or_update(betting_round=current_betting_round, owner=user, data=bet_data)
 
             # Let user know everything went well
             bot.send_message(chat_id, _e(f"Tu apuesta para la jornada {betting_round_number} ha sido almacenada correctamente!"))
-        except:
-            logging.exception('Got exception in store_bet handler')
-            raise
+        except DbEntryClosedException as dece:
+            logging.exception(dece)
+            match dece.args[0]['error']:
+                case 'ERROR_0001':
+                    bot.send_message(chat_id, _e(f"ERROR: La temporada {season_id} está cerrada y no se pueden enviar apuestas."))
+                case 'ERROR_0002':
+                    bot.send_message(chat_id, _e(f"ERROR: La jornada {betting_round_number} está cerrada y no se pueden enviar apuestas."))
+        except Exception as e:
+            dt = datetime.datetime.now().isoformat()
+            bot.send_message(chat_id, _e(f"ERROR: Indefinido : " + dt))
+            logging.exception(dt)
+            logging.exception(e)
 
 
 
